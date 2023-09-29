@@ -1,8 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -13,7 +14,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  const logger = new ConsoleLogger();
+  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
   app.useLogger(logger);
 
   const config = new DocumentBuilder()
@@ -28,6 +29,6 @@ async function bootstrap() {
   const port = configService.get<number>('PORT', 3000);
 
   await app.listen(port);
-  console.log(`App listening on port: ${port}`);
+  logger.log(`App listening on port: ${port}`, AppModule.name);
 }
 bootstrap();
